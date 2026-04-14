@@ -252,13 +252,13 @@ As a developer using the library, I want to load a spec from a file path, a URL,
 As the diff engine, I need a single version-agnostic IR so I can compare Swagger 2.0 against OpenAPI 3.1 without separate code paths.
 
 **Tasks:**
-- [ ] **1.2.1** Define `IRSpec` TypeScript type: paths, operations, parameters, request bodies, responses, schemas, security schemes, tags, servers
-- [ ] **1.2.2** Implement `swagger2ToIR(spec): IRSpec` normalizer (Swagger 2.0 → IR)
-- [ ] **1.2.3** Implement `oas3ToIR(spec): IRSpec` normalizer (OpenAPI 3.x → IR)
-- [ ] **1.2.4** Handle OAS 3.1 additions: `webhooks`, `$schema`, JSON Schema draft 2020-12 keywords (`unevaluatedProperties`, `prefixItems`, `$dynamicRef`, etc.)
-- [ ] **1.2.5** Handle `allOf` / `oneOf` / `anyOf` flattening for schema comparison (optional flag; keep raw form available)
-- [ ] **1.2.6** Normalize path parameters: treat `{id}` and `{userId}` in same position as the same parameter for comparison
-- [ ] **1.2.7** Write snapshot tests for normalizer output on a large set of real-world specs
+- [x] **1.2.1** Define `IRSpec` TypeScript type: paths, operations, parameters, request bodies, responses, schemas, security schemes, tags, servers
+- [x] **1.2.2** Implement `swagger2ToIR(spec): IRSpec` normalizer (Swagger 2.0 → IR)
+- [x] **1.2.3** Implement `oas3ToIR(spec): IRSpec` normalizer (OpenAPI 3.x → IR)
+- [x] **1.2.4** Handle OAS 3.1 additions: `webhooks`, `$schema`, JSON Schema draft 2020-12 keywords (`unevaluatedProperties`, `prefixItems`, `$dynamicRef`, etc.)
+- [x] **1.2.5** Handle `allOf` / `oneOf` / `anyOf` flattening for schema comparison (optional flag; keep raw form available)
+- [x] **1.2.6** Normalize path parameters: treat `{id}` and `{userId}` in same position as the same parameter for comparison
+- [x] **1.2.7** Write snapshot tests for normalizer output on a large set of real-world specs
 
 ---
 

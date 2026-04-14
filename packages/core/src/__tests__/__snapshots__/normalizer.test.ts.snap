@@ -1,0 +1,439 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`oas3ToIR (OpenAPI 3.0) > snapshot: petstore openapi-3.0.yaml 1`] = `
+{
+  "info": {
+    "description": "A minimal OpenAPI 3.0 fixture for tests",
+    "title": "Pet Store",
+    "version": "1.0.0",
+  },
+  "paths": {
+    "/pets": {
+      "operations": {
+        "get": {
+          "operationId": "listPets",
+          "parameters": [
+            {
+              "description": "Maximum number of pets to return",
+              "in": "query",
+              "name": "limit",
+              "required": false,
+              "schema": {
+                "format": "int32",
+                "type": "integer",
+              },
+            },
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/Pet",
+                    },
+                    "type": "array",
+                  },
+                },
+              },
+              "description": "A list of pets",
+            },
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error",
+                  },
+                },
+              },
+              "description": "Unexpected error",
+            },
+          },
+          "summary": "List all pets",
+        },
+        "post": {
+          "operationId": "createPet",
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewPet",
+                },
+              },
+            },
+            "required": true,
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet",
+                  },
+                },
+              },
+              "description": "Created",
+            },
+          },
+          "summary": "Create a pet",
+        },
+      },
+      "parameters": [],
+    },
+    "/pets/{petId}": {
+      "operations": {
+        "get": {
+          "operationId": "getPet",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "petId",
+              "required": true,
+              "schema": {
+                "format": "int64",
+                "type": "integer",
+              },
+            },
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet",
+                  },
+                },
+              },
+              "description": "A single pet",
+            },
+            "404": {
+              "content": {},
+              "description": "Pet not found",
+            },
+          },
+          "summary": "Get a pet by ID",
+        },
+      },
+      "parameters": [],
+    },
+  },
+  "securitySchemes": {},
+  "servers": [
+    {
+      "url": "https://petstore.example.com/api/v1",
+    },
+  ],
+  "sourceVersion": "openapi-3.0",
+  "tags": [],
+}
+`;
+
+exports[`oas3ToIR (OpenAPI 3.1) > snapshot: petstore openapi-3.1.yaml 1`] = `
+{
+  "info": {
+    "description": "A minimal OpenAPI 3.1 fixture for tests",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT",
+    },
+    "title": "Pet Store",
+    "version": "1.0.0",
+  },
+  "paths": {
+    "/pets": {
+      "operations": {
+        "get": {
+          "operationId": "listPets",
+          "parameters": [
+            {
+              "in": "query",
+              "name": "limit",
+              "required": false,
+              "schema": {
+                "format": "int32",
+                "type": "integer",
+              },
+            },
+            {
+              "in": "query",
+              "name": "tags",
+              "required": false,
+              "schema": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            },
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/Pet",
+                    },
+                    "type": "array",
+                  },
+                },
+              },
+              "description": "A list of pets",
+            },
+          },
+          "summary": "List all pets",
+        },
+      },
+      "parameters": [],
+    },
+    "/pets/{petId}": {
+      "operations": {
+        "get": {
+          "operationId": "getPet",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "petId",
+              "required": true,
+              "schema": {
+                "format": "int64",
+                "type": "integer",
+              },
+            },
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet",
+                  },
+                },
+              },
+              "description": "A single pet",
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error",
+                  },
+                },
+              },
+              "description": "Pet not found",
+            },
+          },
+          "summary": "Get a pet by ID",
+        },
+      },
+      "parameters": [],
+    },
+    "/pets/{petId}/photos": {
+      "operations": {
+        "post": {
+          "operationId": "uploadPetPhoto",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "petId",
+              "required": true,
+              "schema": {
+                "type": "integer",
+              },
+            },
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "properties": {
+                    "file": {
+                      "contentMediaType": "image/*",
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                },
+              },
+            },
+            "required": true,
+          },
+          "responses": {
+            "201": {
+              "content": {},
+              "description": "Photo uploaded",
+            },
+          },
+          "summary": "Upload a pet photo",
+        },
+      },
+      "parameters": [],
+    },
+  },
+  "securitySchemes": {},
+  "servers": [
+    {
+      "url": "https://petstore.example.com/api/v1",
+    },
+  ],
+  "sourceVersion": "openapi-3.1",
+  "tags": [],
+  "webhooks": {
+    "newPet": {
+      "operations": {
+        "post": {
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet",
+                },
+              },
+            },
+            "required": true,
+          },
+          "responses": {
+            "200": {
+              "content": {},
+              "description": "Acknowledged",
+            },
+          },
+          "summary": "New pet registered",
+        },
+      },
+      "parameters": [],
+    },
+  },
+}
+`;
+
+exports[`swagger2ToIR > snapshot: petstore swagger-2.0.json 1`] = `
+{
+  "info": {
+    "description": "A minimal Swagger 2.0 fixture for tests",
+    "title": "Pet Store",
+    "version": "1.0.0",
+  },
+  "paths": {
+    "/pets": {
+      "operations": {
+        "get": {
+          "operationId": "listPets",
+          "parameters": [
+            {
+              "description": "Maximum number of pets to return",
+              "in": "query",
+              "name": "limit",
+              "required": false,
+              "schema": {
+                "format": "int32",
+                "type": "integer",
+              },
+            },
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/definitions/Pet",
+                    },
+                    "type": "array",
+                  },
+                },
+              },
+              "description": "A list of pets",
+            },
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/definitions/Error",
+                  },
+                },
+              },
+              "description": "Unexpected error",
+            },
+          },
+          "summary": "List all pets",
+        },
+        "post": {
+          "operationId": "createPet",
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/NewPet",
+                },
+              },
+            },
+            "required": true,
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/definitions/Pet",
+                  },
+                },
+              },
+              "description": "Created",
+            },
+          },
+          "summary": "Create a pet",
+        },
+      },
+      "parameters": [],
+    },
+    "/pets/{petId}": {
+      "operations": {
+        "get": {
+          "operationId": "getPet",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "petId",
+              "required": true,
+              "schema": {
+                "format": "int64",
+                "type": "integer",
+              },
+            },
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/definitions/Pet",
+                  },
+                },
+              },
+              "description": "A single pet",
+            },
+            "404": {
+              "content": {},
+              "description": "Pet not found",
+            },
+          },
+          "summary": "Get a pet by ID",
+        },
+      },
+      "parameters": [],
+    },
+  },
+  "securitySchemes": {},
+  "servers": [
+    {
+      "url": "https://petstore.example.com/api/v1",
+    },
+  ],
+  "sourceVersion": "swagger-2.0",
+  "tags": [],
+}
+`;
