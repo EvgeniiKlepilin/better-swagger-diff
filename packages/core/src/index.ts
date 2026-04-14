@@ -2,6 +2,7 @@
 // Story 1.1 — Spec Loading & Parsing
 // Story 1.2 — Internal Representation & Normalizer
 // Story 1.3 — Structural Differ
+// Story 1.4 — Diff Result Schema
 
 export { loadSpec, loadSpecFromString } from './loader/load-spec.js';
 export { loadSpecFromGit } from './loader/load-from-git.js';
@@ -41,6 +42,7 @@ export { deepEqual, appendPointer, escapePointerSegment } from './diff/utils.js'
 
 export type {
   DiffChangeType,
+  SourceLocation,
   DiffItem,
   DiffResult,
   DiffOptions,
@@ -52,6 +54,10 @@ export type {
   ResponseDiff,
   HeaderDiff,
 } from './diff/types.js';
+
+// Diff Result JSON Schema (1.4.3)
+export { DIFF_RESULT_SCHEMA } from './diff/diff-result.schema.js';
+export type { DiffResultSchema } from './diff/diff-result.schema.js';
 
 export type {
   IRSpec,
