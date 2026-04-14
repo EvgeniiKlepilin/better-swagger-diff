@@ -267,19 +267,19 @@ As the diff engine, I need a single version-agnostic IR so I can compare Swagger
 As a developer, I want the engine to produce a detailed, typed diff object enumerating every addition, removal, and modification in the spec.
 
 **Tasks:**
-- [ ] **1.3.1** Implement `diff(base: IRSpec, head: IRSpec): DiffResult` — top-level differ
-- [ ] **1.3.2** Path-level diff: added paths, removed paths, modified paths
-- [ ] **1.3.3** Operation-level diff: added/removed/modified operations per path (per HTTP method)
-- [ ] **1.3.4** Parameter diff: added/removed/modified parameters (query, path, header, cookie) including `required`, `type`, `schema`, `default`, `enum`
-- [ ] **1.3.5** Request body diff: content type changes, schema changes, `required` flag changes
-- [ ] **1.3.6** Response diff: added/removed/modified status codes, headers, and response schemas
-- [ ] **1.3.7** Schema diff: deep recursive comparison of JSON Schema objects (type, format, properties, items, additionalProperties, enum, minimum, maximum, exclusiveMinimum, exclusiveMaximum, pattern, minLength, maxLength, nullable, readOnly, writeOnly, deprecated)
-- [ ] **1.3.8** Security scheme diff: added/removed/modified security schemes and operation-level security requirements
-- [ ] **1.3.9** Tag diff: added/removed/modified tags
-- [ ] **1.3.10** Server/basePath diff: server URL changes
-- [ ] **1.3.11** `x-` extension diff: track vendor extension changes (configurable: include/exclude)
-- [ ] **1.3.12** `deprecated` flag tracking: flag newly deprecated endpoints
-- [ ] **1.3.13** Write property-based tests using `fast-check` for diff symmetry and idempotency
+- [x] **1.3.1** Implement `diff(base: IRSpec, head: IRSpec): DiffResult` — top-level differ
+- [x] **1.3.2** Path-level diff: added paths, removed paths, modified paths
+- [x] **1.3.3** Operation-level diff: added/removed/modified operations per path (per HTTP method)
+- [x] **1.3.4** Parameter diff: added/removed/modified parameters (query, path, header, cookie) including `required`, `type`, `schema`, `default`, `enum`
+- [x] **1.3.5** Request body diff: content type changes, schema changes, `required` flag changes
+- [x] **1.3.6** Response diff: added/removed/modified status codes, headers, and response schemas
+- [x] **1.3.7** Schema diff: deep recursive comparison of JSON Schema objects (type, format, properties, items, additionalProperties, enum, minimum, maximum, exclusiveMinimum, exclusiveMaximum, pattern, minLength, maxLength, nullable, readOnly, writeOnly, deprecated)
+- [x] **1.3.8** Security scheme diff: added/removed/modified security schemes and operation-level security requirements
+- [x] **1.3.9** Tag diff: added/removed/modified tags
+- [x] **1.3.10** Server/basePath diff: server URL changes
+- [x] **1.3.11** `x-` extension diff: track vendor extension changes (configurable: include/exclude)
+- [x] **1.3.12** `deprecated` flag tracking: flag newly deprecated endpoints
+- [x] **1.3.13** Write property-based tests using `fast-check` for diff symmetry and idempotency
 
 ---
 

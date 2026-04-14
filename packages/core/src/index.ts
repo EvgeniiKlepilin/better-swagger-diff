@@ -1,6 +1,7 @@
 // Public API for @better-swagger-diff/core
 // Story 1.1 — Spec Loading & Parsing
 // Story 1.2 — Internal Representation & Normalizer
+// Story 1.3 — Structural Differ
 
 export { loadSpec, loadSpecFromString } from './loader/load-spec.js';
 export { loadSpecFromGit } from './loader/load-from-git.js';
@@ -22,6 +23,36 @@ export type {
 export { swagger2ToIR } from './ir/swagger2-to-ir.js';
 export { oas3ToIR } from './ir/oas3-to-ir.js';
 export { normalizeSchema } from './ir/normalize-schema.js';
+// Differ
+export { diff } from './diff/differ.js';
+export { diffSchemas, diffSchemaRecord } from './diff/diff-schema.js';
+export { diffParameters, diffRequestBody, diffMediaTypes, diffExtensionMap } from './diff/diff-params.js';
+export { diffResponses } from './diff/diff-responses.js';
+export { diffOperation } from './diff/diff-operations.js';
+export { diffPathMaps } from './diff/diff-paths.js';
+export {
+  diffTags,
+  diffServers,
+  diffSecuritySchemes,
+  diffGlobalSecurity,
+  diffSpecExtensions,
+} from './diff/diff-misc.js';
+export { deepEqual, appendPointer, escapePointerSegment } from './diff/utils.js';
+
+export type {
+  DiffChangeType,
+  DiffItem,
+  DiffResult,
+  DiffOptions,
+  PathDiff,
+  OperationDiff,
+  ParameterDiff,
+  RequestBodyDiff,
+  MediaTypeDiff,
+  ResponseDiff,
+  HeaderDiff,
+} from './diff/types.js';
+
 export type {
   IRSpec,
   IRPathItem,
