@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { swagger2ToIR } from '../ir/swagger2-to-ir.js';
 import { oas3ToIR } from '../ir/oas3-to-ir.js';
 import { parseYamlOrJson } from '../loader/parse-content.js';
-import type { IRSpec } from '../ir/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixtures = resolve(__dirname, 'fixtures');

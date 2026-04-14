@@ -381,6 +381,15 @@ export interface PathDiff {
   /** Path item value from the head spec. Absent when `type === "removed"`. */
   after?: IRPathItem;
   /**
+   * Changes to path-level parameters (the `parameters` array on the path item
+   * itself, inherited by all operations).  These are distinct from
+   * operation-level parameter changes, which appear under the relevant
+   * {@link OperationDiff} in `operations`.
+   *
+   * Empty array when no path-level parameters changed.
+   */
+  pathParameters: ParameterDiff[];
+  /**
    * Operation-level changes within this path.
    * Populated even when `type === "added"` or `"removed"` to list every
    * operation that was implicitly gained or lost.

@@ -334,7 +334,7 @@ export const DIFF_RESULT_SCHEMA = {
     PathDiff: {
       type: 'object',
       description: 'Change to a single path item (URL template).',
-      required: ['path', 'type', 'jsonPointer', 'operations'],
+      required: ['path', 'type', 'jsonPointer', 'pathParameters', 'operations'],
       additionalProperties: false,
       properties: {
         path: { type: 'string', description: 'Path template, e.g. "/pets".' },
@@ -345,6 +345,11 @@ export const DIFF_RESULT_SCHEMA = {
         },
         before: { type: 'object' },
         after: { type: 'object' },
+        pathParameters: {
+          type: 'array',
+          description: 'Changes to path-level parameters inherited by all operations. Empty when none changed.',
+          items: { $ref: '#/$defs/ParameterDiff' },
+        },
         operations: {
           type: 'array',
           items: { $ref: '#/$defs/OperationDiff' },

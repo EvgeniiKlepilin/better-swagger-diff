@@ -33,12 +33,12 @@ export function diffPathMaps(
     const ptr = appendPointer(rootPointer, pathTemplate);
 
     if (!bPath) {
-      diffs.push({ path: pathTemplate, type: 'added', jsonPointer: ptr, before: undefined, after: hPath, operations: [] });
+      diffs.push({ path: pathTemplate, type: 'added', jsonPointer: ptr, before: undefined, after: hPath, pathParameters: [], operations: [] });
       continue;
     }
 
     if (!hPath) {
-      diffs.push({ path: pathTemplate, type: 'removed', jsonPointer: ptr, before: bPath, after: undefined, operations: [] });
+      diffs.push({ path: pathTemplate, type: 'removed', jsonPointer: ptr, before: bPath, after: undefined, pathParameters: [], operations: [] });
       continue;
     }
 
@@ -95,33 +95,14 @@ export function diffPathMaps(
       appendPointer(ptr, 'parameters'),
     );
 
-    // Represent path-level param changes as synthetic operation diffs on
-    // a special "$path-params" pseudo-method isn't clean — instead we attach
-    // them as changes on each affected operation.  For now we surface them as
-    // a separate OperationDiff with method marker "__path__" kept in the
-    // changes array.  Callers can filter this as needed.
-    if (pathParamDiffs.length > 0) {
-      operations.push({
-        path: pathTemplate,
-        method: 'get', // placeholder; callers should check jsonPointer to detect path-level entries
-        type: 'modified',
-        jsonPointer: appendPointer(ptr, 'parameters'),
-        before: undefined,
-        after: undefined,
-        changes: [],
-        parameters: pathParamDiffs,
-        responses: [],
-        extensions: [],
-      });
-    }
-
-    if (operations.length > 0) {
+    if (operations.length > 0 || pathParamDiffs.length > 0) {
       diffs.push({
         path: pathTemplate,
         type: 'modified',
         jsonPointer: ptr,
         before: bPath,
         after: hPath,
+        pathParameters: pathParamDiffs,
         operations,
       });
     }

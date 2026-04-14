@@ -234,12 +234,15 @@ function normalizeOAuthFlow(
 
 function normalizeSecurityScheme(raw: OAS3SecurityScheme): IRSecurityScheme {
   const s = raw as unknown as Record<string, unknown>;
+  // Use the raw string type so we can handle OAS 3.1 additions (e.g. mutualTLS)
+  // that are not in the openapi-types union for this library version.
+  const rawType = s['type'] as string;
   const base = {
     ...(s['description'] !== undefined && { description: s['description'] as string }),
     ...(pickExtensions(s) ? { extensions: pickExtensions(s) } : {}),
   };
 
-  switch (raw.type) {
+  switch (rawType) {
     case 'apiKey': {
       const ak = raw as OpenAPIV3.ApiKeySecurityScheme;
       return {
@@ -277,8 +280,13 @@ function normalizeSecurityScheme(raw: OAS3SecurityScheme): IRSecurityScheme {
         ...base,
       };
     }
+    case 'mutualTLS':
+      // OAS 3.1 mutual TLS — no additional fields beyond base.
+      return { type: 'mutualTLS', ...base };
     default:
-      return { type: 'apiKey', ...base };
+      // Unknown type — preserve as-is rather than silently coercing to 'apiKey'
+      // (which would produce incorrect diffs for future spec additions).
+      return { type: rawType as 'apiKey', ...base };
   }
 }
 

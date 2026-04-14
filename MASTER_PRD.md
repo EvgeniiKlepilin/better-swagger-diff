@@ -288,10 +288,10 @@ As a developer, I want the engine to produce a detailed, typed diff object enume
 As an integrator, I want the diff result to be a well-typed, serializable data structure so I can process it programmatically.
 
 **Tasks:**
-- [ ] **1.4.1** Define `DiffResult` TypeScript type with full JSDoc
-- [ ] **1.4.2** Each diff item carries: `type` (added|removed|modified), `path` (JSON Pointer), `location` (source line/col when available), `before`, `after`
-- [ ] **1.4.3** Generate JSON Schema for `DiffResult` for documentation and validation
-- [ ] **1.4.4** Ensure `DiffResult` is round-trip serializable (JSON.stringify ↔ parse)
+- [x] **1.4.1** Define `DiffResult` TypeScript type with full JSDoc
+- [x] **1.4.2** Each diff item carries: `type` (added|removed|modified), `path` (JSON Pointer), `location` (source line/col when available), `before`, `after`
+- [x] **1.4.3** Generate JSON Schema for `DiffResult` for documentation and validation
+- [x] **1.4.4** Ensure `DiffResult` is round-trip serializable (JSON.stringify ↔ parse)
 
 ---
 

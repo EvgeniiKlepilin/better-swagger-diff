@@ -11,7 +11,6 @@ import type {
   IRSecurityScheme,
   IROAuthFlows,
   IRServer,
-  IRTag,
   NormalizeOptions,
 } from './types.js';
 import { normalizeSchema } from './normalize-schema.js';
@@ -27,11 +26,18 @@ function pickExtensions(obj: Record<string, unknown>): Record<string, unknown> |
   return Object.keys(exts).length ? exts : undefined;
 }
 
-/** Translate Swagger 2.0 `collectionFormat` to an OAS 3.x-style `style`. */
-function collectionFormatToStyle(cf?: string): string | undefined {
+/**
+ * Translate Swagger 2.0 `collectionFormat` to an OAS 3.x-style `style`.
+ *
+ * The mapping is location-sensitive:
+ * - `csv` in `path` or `header` → `"simple"` (comma-delimited, OAS 3.x default for those locations)
+ * - `csv` in `query` or `cookie` → `"form"` (OAS 3.x query default, explode:false means csv)
+ * - `multi` is valid for `query`/`cookie` only; maps to `"form"` with `explode:true` (default).
+ */
+function collectionFormatToStyle(cf: string | undefined, paramIn: string): string | undefined {
   switch (cf) {
     case 'csv':
-      return 'form'; // closest OAS 3 analogue for query; "simple" for path/header
+      return paramIn === 'path' || paramIn === 'header' ? 'simple' : 'form';
     case 'ssv':
       return 'spaceDelimited';
     case 'pipes':
@@ -45,45 +51,44 @@ function collectionFormatToStyle(cf?: string): string | undefined {
 
 function normalizeParameter(
   raw: OpenAPIV2.Parameter,
-  producesGlobal: string[],
   opts: NormalizeOptions,
 ): IRParameter {
   const p = raw as unknown as Record<string, unknown>;
 
-  // Body parameters become request bodies; they shouldn't appear as parameters.
-  // We handle them separately in normalizeOperation, but the type still goes through
-  // here occasionally when building path-level parameters. Guard defensively.
-  const schema =
-    raw.in === 'body'
-      ? normalizeSchema((raw as InBodyParameter).schema, opts)
-      : raw.in !== 'body'
-        ? normalizeSchema(
-            {
-              type: (raw as OpenAPIV2.GeneralParameterObject).type,
-              format: (raw as OpenAPIV2.GeneralParameterObject).format,
-              enum: (raw as OpenAPIV2.GeneralParameterObject).enum as unknown[],
-              items: (raw as OpenAPIV2.GeneralParameterObject).items as unknown as Record<string, unknown>,
-              default: (raw as OpenAPIV2.GeneralParameterObject).default,
-              minimum: (raw as OpenAPIV2.GeneralParameterObject).minimum,
-              maximum: (raw as OpenAPIV2.GeneralParameterObject).maximum,
-              minLength: (raw as OpenAPIV2.GeneralParameterObject).minLength,
-              maxLength: (raw as OpenAPIV2.GeneralParameterObject).maxLength,
-              pattern: (raw as OpenAPIV2.GeneralParameterObject).pattern,
-              minItems: (raw as OpenAPIV2.GeneralParameterObject).minItems,
-              maxItems: (raw as OpenAPIV2.GeneralParameterObject).maxItems,
-              uniqueItems: (raw as OpenAPIV2.GeneralParameterObject).uniqueItems,
-            },
-            opts,
-          )
-        : undefined;
+  // Body parameters must be converted to request bodies via buildRequestBody.
+  // They are filtered out before this function is called; reaching here means
+  // a caller bug — throw rather than silently emit corrupt IR.
+  if (raw.in === 'body') {
+    throw new Error(
+      `normalizeParameter: body parameter "${raw.name}" must be handled by buildRequestBody, not normalizeParameter`,
+    );
+  }
 
-  const style = collectionFormatToStyle(
-    (raw as OpenAPIV2.GeneralParameterObject).collectionFormat,
+  const g = raw as OpenAPIV2.GeneralParameterObject;
+  const schema = normalizeSchema(
+    {
+      type: g.type,
+      format: g.format,
+      enum: g.enum as unknown[],
+      items: g.items as unknown as Record<string, unknown>,
+      default: g.default,
+      minimum: g.minimum,
+      maximum: g.maximum,
+      minLength: g.minLength,
+      maxLength: g.maxLength,
+      pattern: g.pattern,
+      minItems: g.minItems,
+      maxItems: g.maxItems,
+      uniqueItems: g.uniqueItems,
+    },
+    opts,
   );
+
+  const style = collectionFormatToStyle(g.collectionFormat, raw.in);
 
   return {
     name: raw.name,
-    in: raw.in === 'body' ? 'query' : (raw.in as ParameterLocation),
+    in: raw.in as ParameterLocation,
     required: raw.required ?? false,
     ...(raw.description !== undefined && { description: raw.description }),
     ...(schema && Object.keys(schema).length ? { schema } : {}),
@@ -171,7 +176,7 @@ function normalizeOperation(
 
   // Path-level params are overridden by op-level params with the same name+in
   const mergedParams = mergeParameters(pathParams.filter((p) => p.in !== 'body'), nonBodyParams);
-  const parameters = mergedParams.map((p) => normalizeParameter(p, producesGlobal, opts));
+  const parameters = mergedParams.map((p) => normalizeParameter(p, opts));
 
   const requestBody = bodyParam
     ? buildRequestBody(bodyParam, consumesGlobal, raw.consumes, opts)
@@ -211,7 +216,7 @@ function mergeParameters(
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'] as const;
 
 function normalizePathItem(
-  path: string,
+  _path: string,
   raw: OpenAPIV2.PathItemObject,
   producesGlobal: string[],
   consumesGlobal: string[],
@@ -222,7 +227,7 @@ function normalizePathItem(
 
   const parameters = rawPathParams
     .filter((p) => p.in !== 'body')
-    .map((p) => normalizeParameter(p, producesGlobal, opts));
+    .map((p) => normalizeParameter(p, opts));
 
   const operations: IRPathItem['operations'] = {};
   for (const method of HTTP_METHODS) {
@@ -280,7 +285,8 @@ function normalizeSecurityScheme(
       return { type: 'oauth2', flows, ...base };
     }
     default:
-      return { type: 'apiKey', ...base };
+      // Unknown type — preserve rather than silently coerce to 'apiKey'.
+      return { type: (raw as { type: string }).type as 'apiKey', ...base };
   }
 }
 

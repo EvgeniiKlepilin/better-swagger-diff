@@ -23,6 +23,7 @@ export function parseYamlOrJson(content: string): unknown {
     } catch (err) {
       throw new Error(
         `Invalid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
       );
     }
   }
@@ -35,7 +36,7 @@ export function parseYamlOrJson(content: string): unknown {
     return result;
   } catch (err) {
     if (err instanceof yaml.YAMLException) {
-      throw new Error(`Invalid YAML: ${err.message}`);
+      throw new Error(`Invalid YAML: ${err.message}`, { cause: err });
     }
     throw err;
   }

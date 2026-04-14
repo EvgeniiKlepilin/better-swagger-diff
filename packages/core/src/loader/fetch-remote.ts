@@ -105,7 +105,7 @@ async function fetchWithTimeout(
     return await fetch(url, { headers: opts.headers, signal: controller.signal });
   } catch (err) {
     if (controller.signal.aborted) {
-      throw new Error(`Request timed out after ${opts.timeout}ms: ${url}`);
+      throw new Error(`Request timed out after ${opts.timeout}ms: ${url}`, { cause: err });
     }
     throw err;
   } finally {

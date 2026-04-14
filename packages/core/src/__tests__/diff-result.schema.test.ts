@@ -8,6 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import Ajv from 'ajv';
 import { diff } from '../diff/differ.js';
 import { DIFF_RESULT_SCHEMA } from '../diff/diff-result.schema.js';
 import type { DiffItem, DiffResult, SourceLocation } from '../diff/types.js';
@@ -120,6 +121,12 @@ describe('Story 1.4.3 — DIFF_RESULT_SCHEMA', () => {
     for (const key of ['isEmpty', 'paths', 'webhooks', 'securitySchemes', 'tags', 'servers', 'extensions']) {
       expect(required).toContain(key);
     }
+  });
+
+  it('PathDiff required includes pathParameters', () => {
+    const required = DIFF_RESULT_SCHEMA.$defs.PathDiff.required as readonly string[];
+    expect(required).toContain('pathParameters');
+    expect(required).toContain('operations');
   });
 
   it('properties includes all DiffResult fields', () => {
@@ -361,5 +368,102 @@ describe('Story 1.4.4 — DiffResult round-trip serialization', () => {
     const result = diff(base, head);
     const restored = roundTrip(result);
     expect(deepEqual(result, restored)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 1.4.3 — DIFF_RESULT_SCHEMA validates real diff() output (ajv)
+// ---------------------------------------------------------------------------
+
+describe('Story 1.4.3 — DIFF_RESULT_SCHEMA validates actual diff output', () => {
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  const validate = ajv.compile(DIFF_RESULT_SCHEMA);
+
+  function assertValid(result: DiffResult): void {
+    const valid = validate(result);
+    if (!valid) {
+      throw new Error(
+        `DiffResult failed schema validation:\n${ajv.errorsText(validate.errors)}`,
+      );
+    }
+  }
+
+  it('empty diff (identical specs) is valid', () => {
+    assertValid(diff(makeSpec(), makeSpec()));
+  });
+
+  it('result with an added path is valid', () => {
+    const head = makeSpec({
+      paths: {
+        '/users': {
+          parameters: [],
+          operations: {
+            get: { parameters: [], responses: { '200': { description: 'OK', content: {} } } },
+          },
+        },
+      },
+    });
+    assertValid(diff(makeSpec(), head));
+  });
+
+  it('result with a removed path is valid', () => {
+    const base = makeSpec({
+      paths: {
+        '/legacy': {
+          parameters: [],
+          operations: {
+            get: { parameters: [], responses: { '200': { description: 'OK', content: {} } } },
+          },
+        },
+      },
+    });
+    assertValid(diff(base, makeSpec()));
+  });
+
+  it('result with modified parameter (required change) is valid', () => {
+    const makeOp = (required: boolean) => ({
+      parameters: [{ name: 'limit', in: 'query' as const, required, schema: { type: 'integer' as const } }],
+      responses: { '200': { description: 'OK', content: {} } },
+    });
+    const base = makeSpec({ paths: { '/items': { parameters: [], operations: { get: makeOp(false) } } } });
+    const head = makeSpec({ paths: { '/items': { parameters: [], operations: { get: makeOp(true) } } } });
+    assertValid(diff(base, head));
+  });
+
+  it('result with path-level parameter change is valid', () => {
+    const base = makeSpec({
+      paths: {
+        '/items/{id}': {
+          parameters: [{ name: 'id', in: 'path' as const, required: true }],
+          operations: { get: { parameters: [], responses: { '200': { description: 'OK', content: {} } } } },
+        },
+      },
+    });
+    const head = makeSpec({
+      paths: {
+        '/items/{id}': {
+          parameters: [{ name: 'id', in: 'path' as const, required: true, description: 'Item ID' }],
+          operations: { get: { parameters: [], responses: { '200': { description: 'OK', content: {} } } } },
+        },
+      },
+    });
+    assertValid(diff(base, head));
+  });
+
+  it('result with security scheme changes is valid', () => {
+    const base = makeSpec({ securitySchemes: { ApiKey: { type: 'apiKey', name: 'X-Api-Key', in: 'header' } } });
+    assertValid(diff(base, makeSpec()));
+  });
+
+  it('result with tag and server changes is valid', () => {
+    const base = makeSpec({
+      tags: [{ name: 'pets' }],
+      servers: [{ url: 'https://v1.api.example.com' }],
+    });
+    const head = makeSpec({
+      tags: [{ name: 'pets' }, { name: 'users' }],
+      servers: [{ url: 'https://v2.api.example.com' }],
+    });
+    assertValid(diff(base, head));
   });
 });

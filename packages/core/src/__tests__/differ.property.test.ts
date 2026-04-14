@@ -75,13 +75,23 @@ const arbSpec: fc.Arbitrary<IRSpec> = fc.record({
     { maxLength: 2 },
   ),
   paths: fc.dictionary(
-    fc.constantFrom('/pets', '/users', '/orders', '/items'),
+    fc.constantFrom('/pets', '/users', '/orders', '/items/{id}'),
     fc.record({
-      parameters: fc.constant([]),
+      // Generate path-level parameters (e.g. path parameters inherited by all operations).
+      parameters: fc.array(
+        fc.record({
+          name: fc.constantFrom('id', 'version', 'locale'),
+          in: fc.constantFrom('path', 'header') as fc.Arbitrary<IRParameter['in']>,
+          required: fc.boolean(),
+          schema: fc.option(arbSchema, { nil: undefined }),
+        }),
+        { maxLength: 2 },
+      ),
       operations: fc.record(
         {
           get: fc.option(arbOperation, { nil: undefined }),
           post: fc.option(arbOperation, { nil: undefined }),
+          put: fc.option(arbOperation, { nil: undefined }),
         },
         { requiredKeys: [] },
       ).map((ops) => Object.fromEntries(Object.entries(ops).filter(([, v]) => v !== undefined))),
@@ -252,6 +262,58 @@ describe('Property: anti-symmetry — diff(a,b) ↔ diff(b,a) (1.3.13)', () => {
         const baAdded = baPaths.filter((p) => p.type === 'added').map((p) => p.path).sort();
 
         expect(abRemoved).toEqual(baAdded);
+      }),
+      { numRuns: 200 },
+    );
+  });
+
+  it('operation-level diffs are anti-symmetric (added ↔ removed)', () => {
+    fc.assert(
+      fc.property(arbSpec, arbSpec, (a, b) => {
+        const abOps = diff(a, b).paths.flatMap((p) =>
+          p.operations.map((op) => `${op.path}::${op.method}::${op.type}`),
+        ).sort();
+        const baOps = diff(b, a).paths.flatMap((p) =>
+          p.operations.map((op) => `${op.path}::${op.method}::${op.type}`),
+        ).sort();
+
+        // Every added op in a→b should appear as removed in b→a and vice versa.
+        const abAdded = abOps.filter((s) => s.endsWith('::added')).map((s) => s.replace(/::added$/, '')).sort();
+        const baRemoved = baOps.filter((s) => s.endsWith('::removed')).map((s) => s.replace(/::removed$/, '')).sort();
+        expect(abAdded).toEqual(baRemoved);
+
+        const abRemoved = abOps.filter((s) => s.endsWith('::removed')).map((s) => s.replace(/::removed$/, '')).sort();
+        const baAdded = baOps.filter((s) => s.endsWith('::added')).map((s) => s.replace(/::added$/, '')).sort();
+        expect(abRemoved).toEqual(baAdded);
+      }),
+      { numRuns: 200 },
+    );
+  });
+
+  it('path-level parameter diffs land on pathParameters, not operations', () => {
+    fc.assert(
+      fc.property(arbSpec, arbSpec, (a, b) => {
+        const result = diff(a, b);
+        for (const pathDiff of result.paths) {
+          if (pathDiff.type === 'modified') {
+            // path-level param changes must appear in pathParameters, not as
+            // a phantom operation entry.
+            expect(pathDiff.pathParameters).toBeInstanceOf(Array);
+            // No operation should be a synthetic placeholder (method:'get'
+            // with undefined before/after and no real operation in base/head).
+            for (const opDiff of pathDiff.operations) {
+              if (opDiff.type === 'modified') {
+                // A real modified operation must exist in both sides of the path.
+                const bPath = a.paths[pathDiff.path];
+                const hPath = b.paths[pathDiff.path];
+                if (bPath && hPath) {
+                  const method = opDiff.method as keyof typeof bPath.operations;
+                  expect(bPath.operations[method] ?? hPath.operations[method]).toBeDefined();
+                }
+              }
+            }
+          }
+        }
       }),
       { numRuns: 200 },
     );

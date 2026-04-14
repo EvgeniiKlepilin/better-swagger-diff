@@ -302,6 +302,23 @@ describe('loadSpec — URL loading', () => {
     ).rejects.toThrow(/401/);
   });
 
+  it('throws a timeout error when fetch takes longer than the configured timeout', async () => {
+    // Simulate a fetch that never resolves by returning a promise that only
+    // rejects when the AbortSignal is aborted.
+    vi.stubGlobal('fetch', vi.fn((_url: string, init?: RequestInit) => {
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => {
+          const err = new DOMException('The operation was aborted.', 'AbortError');
+          reject(err);
+        });
+      });
+    }));
+
+    await expect(
+      loadSpec('https://api.example.com/slow.json', { cache: false, dereference: false, timeout: 50 }),
+    ).rejects.toThrow(/timed out/i);
+  });
+
   it('1.1.8 caches remote specs and returns without a second fetch', async () => {
     const mockFetch = makeMockFetch([{ ok: true, status: 200, body: MINIMAL_OAS30 }]);
     vi.stubGlobal('fetch', mockFetch);

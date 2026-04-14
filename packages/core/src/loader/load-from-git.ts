@@ -72,6 +72,7 @@ export async function loadSpecFromGit(
       `  path: ${normalizedPath}\n\n` +
       `Verify that the repository path is correct, the ref exists, and the ` +
       `file is present at that ref.\n\nOriginal error: ${detail}`,
+      { cause: err },
     );
   }
 
