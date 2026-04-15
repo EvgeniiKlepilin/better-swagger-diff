@@ -125,4 +125,21 @@ describe('formatMarkdown', () => {
     const out = formatMarkdown({ ...makeResult(), isEmpty: true }, emptyClassification);
     expect(out).toContain('No changes');
   });
+
+  it('contains ## Changes heading for info items', () => {
+    const out = formatMarkdown(makeResult(), makeClassification());
+    expect(out).toContain('## Changes');
+  });
+
+  it('renders info item in the Changes section', () => {
+    const out = formatMarkdown(makeResult(), makeClassification());
+    expect(out).toContain('POST /users');
+  });
+
+  it('formats items with backtick location and em-dash', () => {
+    const out = formatMarkdown(makeResult(), makeClassification());
+    // items formatted as: `- \`{location}\` — {message}`
+    expect(out).toMatch(/`DELETE \/pets\/{petId}`/);
+    expect(out).toContain('— operation removed');
+  });
 });
