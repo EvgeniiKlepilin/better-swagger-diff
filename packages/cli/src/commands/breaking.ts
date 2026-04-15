@@ -17,12 +17,15 @@ export function registerBreakingCommand(program: Command): void {
       const globals = cmd.optsWithGlobals<{
         format: string;
         output?: string;
-        noColor: boolean;
+        color?: boolean;
+        noColor?: boolean;
         quiet: boolean;
         verbose: boolean;
       }>();
 
-      initColors(globals.noColor);
+      // Commander converts --no-color to color: false; normalize to noColor
+      const noColor = globals.color === false ? true : globals.noColor ?? false;
+      initColors(noColor);
 
       try {
         const baseSpec = await loadSpecArg(base);

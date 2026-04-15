@@ -306,14 +306,14 @@ As an integrator, I want the diff result to be a well-typed, serializable data s
 As a developer, I want to run `bsd diff old.yaml new.yaml` and get a diff in my terminal.
 
 **Tasks:**
-- [ ] **2.1.1** Scaffold `packages/cli` with Commander.js, pointing at `core` package
-- [ ] **2.1.2** Implement `bsd diff <base> <head>` command (file paths, URLs, git refs `repo@branch:path`)
-- [ ] **2.1.3** Implement `bsd breaking <base> <head>` — exit 1 if breaking changes found, 0 if clean (CI-friendly)
-- [ ] **2.1.4** Implement `bsd changelog <base> <head>` — human-readable changelog output
-- [ ] **2.1.5** Implement `bsd validate <spec>` — validate a single spec for well-formedness
-- [ ] **2.1.6** Implement `bsd flatten <spec>` — dereference all `$ref`s and output a single-file spec
-- [ ] **2.1.7** Global flags: `--format <text|json|yaml|markdown|html|junit>`, `--output <file>`, `--config <file>`, `--no-color`, `--quiet`, `--verbose`
-- [ ] **2.1.8** Colored terminal output with severity icons (🔴 breaking, 🟡 warning, 🟢 info) — degraded gracefully with `--no-color`
+- [x] **2.1.1** Scaffold `packages/cli` with Commander.js, pointing at `core` package
+- [x] **2.1.2** Implement `bsd diff <base> <head>` command (file paths, URLs, git refs `repo@branch:path`)
+- [x] **2.1.3** Implement `bsd breaking <base> <head>` — exit 1 if breaking changes found, 0 if clean (CI-friendly)
+- [x] **2.1.4** Implement `bsd changelog <base> <head>` — human-readable changelog output
+- [x] **2.1.5** Implement `bsd validate <spec>` — validate a single spec for well-formedness
+- [x] **2.1.6** Implement `bsd flatten <spec>` — dereference all `$ref`s and output a single-file spec
+- [x] **2.1.7** Global flags: `--format <text|json|yaml|markdown|html|junit>`, `--output <file>`, `--config <file>`, `--no-color`, `--quiet`, `--verbose`
+- [x] **2.1.8** Colored terminal output with severity icons (🔴 breaking, 🟡 warning, 🟢 info) — degraded gracefully with `--no-color`
 
 ---
 

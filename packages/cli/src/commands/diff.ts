@@ -15,12 +15,15 @@ export function registerDiffCommand(program: Command): void {
       const globals = cmd.optsWithGlobals<{
         format: string;
         output?: string;
-        noColor: boolean;
+        color?: boolean;
+        noColor?: boolean;
         quiet: boolean;
         verbose: boolean;
       }>();
 
-      initColors(globals.noColor);
+      // Commander converts --no-color to color: false; normalize to noColor
+      const noColor = globals.color === false ? true : globals.noColor ?? false;
+      initColors(noColor);
 
       const format = isValidFormat(globals.format) ? globals.format : 'text';
       if (!isValidFormat(globals.format)) {

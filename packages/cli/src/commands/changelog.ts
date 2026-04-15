@@ -15,12 +15,15 @@ export function registerChangelogCommand(program: Command): void {
       const globals = cmd.optsWithGlobals<{
         format: string;
         output?: string;
-        noColor: boolean;
+        color?: boolean;
+        noColor?: boolean;
         quiet: boolean;
         verbose: boolean;
       }>();
 
-      initColors(globals.noColor);
+      // Commander converts --no-color to color: false; normalize to noColor
+      const noColor = globals.color === false ? true : globals.noColor ?? false;
+      initColors(noColor);
 
       // Default format for changelog is markdown (unlike diff which defaults to text)
       const fmt = isValidFormat(globals.format) ? globals.format : 'markdown';
