@@ -7,38 +7,34 @@ import { formatText } from '../lib/formatters/text.js';
 import { formatJson } from '../lib/formatters/json.js';
 import { initColors } from '../lib/colors.js';
 import { writeOutput } from '../lib/output.js';
-import { isValidFormat } from '../lib/formatters/index.js';
+import { loadConfig, resolveGlobalOptions, getAuthHeaders } from '../lib/config.js';
 
 export function registerBreakingCommand(program: Command): void {
   program
     .command('breaking <base> <head>')
     .description('Check for breaking changes — exits with code 1 if any are found')
     .action(async (base: string, head: string, _opts: unknown, cmd: Command) => {
-      const globals = cmd.optsWithGlobals<{
-        format: string;
+      const rawGlobals = cmd.optsWithGlobals<{
+        format?: string;
         output?: string;
         color?: boolean;
         noColor?: boolean;
-        quiet: boolean;
-        verbose: boolean;
+        quiet?: boolean;
+        verbose?: boolean;
       }>();
 
-      // Commander converts --no-color to color: false; normalize to noColor
-      const noColor = globals.color === false ? true : globals.noColor ?? false;
-      initColors(noColor);
+      const config = loadConfig();
+      const globals = resolveGlobalOptions(rawGlobals, config);
+      initColors(globals.noColor);
 
       try {
-        const baseSpec = await loadSpecArg(base);
-        const headSpec = await loadSpecArg(head);
+        const baseSpec = await loadSpecArg(base, { headers: getAuthHeaders(base, config) });
+        const headSpec = await loadSpecArg(head, { headers: getAuthHeaders(head, config) });
         const result = diff(parsedSpecToIR(baseSpec), parsedSpecToIR(headSpec));
         const classification = classifyDiff(result);
 
         if (!globals.quiet) {
-          // Only show breaking changes (not warnings/info)
-          const breakingOnly = {
-            ...result,
-            isEmpty: classification.breaking.length === 0,
-          };
+          const breakingOnly = { ...result, isEmpty: classification.breaking.length === 0 };
           const breakingClassification = {
             ...classification,
             changes: classification.breaking,
@@ -46,9 +42,8 @@ export function registerBreakingCommand(program: Command): void {
             info: [],
           };
 
-          const fmt = isValidFormat(globals.format) ? globals.format : 'text';
           const output =
-            fmt === 'json'
+            globals.format === 'json'
               ? formatJson(breakingOnly, breakingClassification)
               : formatText(breakingOnly, breakingClassification);
 

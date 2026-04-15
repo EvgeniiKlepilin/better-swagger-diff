@@ -6,36 +6,42 @@ import { classifyDiff } from '../lib/classify.js';
 import { formatDiff, isValidFormat } from '../lib/formatters/index.js';
 import { initColors } from '../lib/colors.js';
 import { writeOutput } from '../lib/output.js';
+import { loadConfig, resolveGlobalOptions, getAuthHeaders } from '../lib/config.js';
 
 export function registerChangelogCommand(program: Command): void {
   program
     .command('changelog <base> <head>')
     .description('Generate a human-readable changelog between two specs')
     .action(async (base: string, head: string, _opts: unknown, cmd: Command) => {
-      const globals = cmd.optsWithGlobals<{
-        format: string;
+      const rawGlobals = cmd.optsWithGlobals<{
+        format?: string;
         output?: string;
         color?: boolean;
         noColor?: boolean;
-        quiet: boolean;
-        verbose: boolean;
+        quiet?: boolean;
+        verbose?: boolean;
       }>();
 
-      // Commander converts --no-color to color: false; normalize to noColor
-      const noColor = globals.color === false ? true : globals.noColor ?? false;
-      initColors(noColor);
+      const config = loadConfig();
+      const globals = resolveGlobalOptions(rawGlobals, config);
 
-      // Default format for changelog is markdown (unlike diff which defaults to text)
-      const fmt = isValidFormat(globals.format) ? globals.format : 'markdown';
+      // changelog defaults to markdown when --format is not explicitly passed
+      // and the config does not specify a format.
+      const format =
+        rawGlobals.format !== undefined && isValidFormat(rawGlobals.format)
+          ? rawGlobals.format
+          : (config?.format ?? 'markdown');
+
+      initColors(globals.noColor);
 
       try {
-        const baseSpec = await loadSpecArg(base);
-        const headSpec = await loadSpecArg(head);
+        const baseSpec = await loadSpecArg(base, { headers: getAuthHeaders(base, config) });
+        const headSpec = await loadSpecArg(head, { headers: getAuthHeaders(head, config) });
         const result = diff(parsedSpecToIR(baseSpec), parsedSpecToIR(headSpec));
         const classification = classifyDiff(result);
 
         if (!globals.quiet) {
-          const output = formatDiff(result, classification, fmt);
+          const output = formatDiff(result, classification, format);
           await writeOutput(output, globals.output);
         }
       } catch (err) {

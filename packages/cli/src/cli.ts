@@ -12,10 +12,13 @@ const program = new Command()
   .version('0.1.0');
 
 // Global flags (Story 2.1.7)
+// NOTE: --format has no default here; resolveGlobalOptions() applies it from
+// config or hardcoded default so we can distinguish "user passed text" from
+// "nothing was passed".
 program
-  .option('--format <fmt>', 'output format: text|json|yaml|markdown|html|junit', 'text')
+  .option('--format <fmt>', 'output format: text|json|yaml|markdown|html|junit')
   .option('--output <file>', 'write output to file instead of stdout')
-  .option('--config <file>', 'config file path (full support in Story 2.2)')
+  .option('--config <file>', 'config file path (reserved — currently unused, config auto-discovered)')
   .option('--no-color', 'disable colored output and emoji icons')
   .option('--quiet', 'suppress all non-error output')
   .option('--verbose', 'print additional diagnostic information to stderr');

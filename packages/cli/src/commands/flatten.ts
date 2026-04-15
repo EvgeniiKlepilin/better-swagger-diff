@@ -3,26 +3,31 @@ import yaml from 'js-yaml';
 import { loadSpecArg } from '../lib/load-input.js';
 import { initColors } from '../lib/colors.js';
 import { writeOutput } from '../lib/output.js';
+import { loadConfig, resolveGlobalOptions, getAuthHeaders } from '../lib/config.js';
 
 export function registerFlattenCommand(program: Command): void {
   program
     .command('flatten <spec>')
     .description('Dereference all $refs and output a single-file spec')
     .action(async (spec: string, _opts: unknown, cmd: Command) => {
-      const globals = cmd.optsWithGlobals<{
-        format: string;
+      const rawGlobals = cmd.optsWithGlobals<{
+        format?: string;
         output?: string;
         color?: boolean;
         noColor?: boolean;
-        quiet: boolean;
+        quiet?: boolean;
+        verbose?: boolean;
       }>();
 
-      // Commander converts --no-color to color: false; normalize to noColor
-      const noColor = globals.color === false ? true : globals.noColor ?? false;
-      initColors(noColor);
+      const config = loadConfig();
+      const globals = resolveGlobalOptions(rawGlobals, config);
+      initColors(globals.noColor);
 
       try {
-        const parsed = await loadSpecArg(spec, { dereference: true });
+        const parsed = await loadSpecArg(spec, {
+          dereference: true,
+          headers: getAuthHeaders(spec, config),
+        });
         const doc = parsed.document;
 
         const useYaml = globals.format === 'yaml';

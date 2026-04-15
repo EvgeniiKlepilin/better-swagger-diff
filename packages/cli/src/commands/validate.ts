@@ -2,25 +2,28 @@ import type { Command } from 'commander';
 import { loadSpecArg } from '../lib/load-input.js';
 import { initColors, bold, green, red } from '../lib/colors.js';
 import { writeOutput } from '../lib/output.js';
+import { loadConfig, resolveGlobalOptions, getAuthHeaders } from '../lib/config.js';
 
 export function registerValidateCommand(program: Command): void {
   program
     .command('validate <spec>')
     .description('Validate a spec file for well-formedness and $ref resolution')
     .action(async (spec: string, _opts: unknown, cmd: Command) => {
-      const globals = cmd.optsWithGlobals<{
+      const rawGlobals = cmd.optsWithGlobals<{
+        format?: string;
         output?: string;
         color?: boolean;
         noColor?: boolean;
-        quiet: boolean;
+        quiet?: boolean;
+        verbose?: boolean;
       }>();
 
-      // Commander converts --no-color to color: false; normalize to noColor
-      const noColor = globals.color === false ? true : globals.noColor ?? false;
-      initColors(noColor);
+      const config = loadConfig();
+      const globals = resolveGlobalOptions(rawGlobals, config);
+      initColors(globals.noColor);
 
       try {
-        const parsed = await loadSpecArg(spec);
+        const parsed = await loadSpecArg(spec, { headers: getAuthHeaders(spec, config) });
 
         if (!globals.quiet) {
           const msg = `${green('✓')} ${bold(spec)} is valid (${parsed.version})\n`;

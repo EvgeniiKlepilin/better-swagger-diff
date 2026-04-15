@@ -3,40 +3,37 @@ import { loadSpecArg } from '../lib/load-input.js';
 import { parsedSpecToIR } from '../lib/spec-to-ir.js';
 import { diff } from '@better-swagger-diff/core';
 import { classifyDiff } from '../lib/classify.js';
-import { formatDiff, isValidFormat } from '../lib/formatters/index.js';
+import { formatDiff } from '../lib/formatters/index.js';
 import { initColors } from '../lib/colors.js';
 import { writeOutput } from '../lib/output.js';
+import { loadConfig, resolveGlobalOptions, getAuthHeaders } from '../lib/config.js';
 
 export function registerDiffCommand(program: Command): void {
   program
     .command('diff <base> <head>')
     .description('Compare two OpenAPI/Swagger specs and show all changes')
     .action(async (base: string, head: string, _opts: unknown, cmd: Command) => {
-      const globals = cmd.optsWithGlobals<{
-        format: string;
+      const rawGlobals = cmd.optsWithGlobals<{
+        format?: string;
         output?: string;
         color?: boolean;
         noColor?: boolean;
-        quiet: boolean;
-        verbose: boolean;
+        quiet?: boolean;
+        verbose?: boolean;
       }>();
 
-      // Commander converts --no-color to color: false; normalize to noColor
-      const noColor = globals.color === false ? true : globals.noColor ?? false;
-      initColors(noColor);
-
-      const format = isValidFormat(globals.format) ? globals.format : 'text';
-      if (!isValidFormat(globals.format)) {
-        process.stderr.write(`Unknown format "${globals.format}", defaulting to text.\n`);
-      }
+      const config = loadConfig();
+      const globals = resolveGlobalOptions(rawGlobals, config);
+      initColors(globals.noColor);
 
       try {
         if (globals.verbose) {
           process.stderr.write(`Loading base spec: ${base}\n`);
           process.stderr.write(`Loading head spec: ${head}\n`);
         }
-        const baseSpec = await loadSpecArg(base);
-        const headSpec = await loadSpecArg(head);
+
+        const baseSpec = await loadSpecArg(base, { headers: getAuthHeaders(base, config) });
+        const headSpec = await loadSpecArg(head, { headers: getAuthHeaders(head, config) });
 
         const baseIR = parsedSpecToIR(baseSpec);
         const headIR = parsedSpecToIR(headSpec);
@@ -44,7 +41,7 @@ export function registerDiffCommand(program: Command): void {
         const classification = classifyDiff(result);
 
         if (!globals.quiet) {
-          const output = formatDiff(result, classification, format);
+          const output = formatDiff(result, classification, globals.format);
           await writeOutput(output, globals.output);
         }
       } catch (err) {
