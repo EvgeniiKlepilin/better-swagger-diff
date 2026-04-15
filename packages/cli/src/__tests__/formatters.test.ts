@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { formatText } from '../lib/formatters/text.js';
 import { formatJson } from '../lib/formatters/json.js';
+import { formatYaml } from '../lib/formatters/yaml.js';
+import { formatMarkdown } from '../lib/formatters/markdown.js';
 import { initColors } from '../lib/colors.js';
 import type { DiffResult } from '@better-swagger-diff/core';
 import type { ClassificationResult } from '../lib/classify.js';
@@ -79,5 +81,48 @@ describe('formatJson', () => {
     const parsed = JSON.parse(formatJson(makeResult(), makeClassification()));
     expect(parsed.classification.hasBreaking).toBe(true);
     expect(parsed.classification.breaking).toHaveLength(1);
+  });
+});
+
+describe('formatYaml', () => {
+  it('produces a YAML string with diffResult key', () => {
+    const out = formatYaml(makeResult(), makeClassification());
+    expect(out).toContain('diffResult:');
+  });
+
+  it('produces a YAML string with classification key', () => {
+    const out = formatYaml(makeResult(), makeClassification());
+    expect(out).toContain('classification:');
+  });
+
+  it('YAML output is not valid JSON (it is YAML)', () => {
+    const out = formatYaml(makeResult(), makeClassification());
+    // YAML uses `key: value` not `"key": value`
+    expect(out).not.toMatch(/^{/);
+  });
+});
+
+describe('formatMarkdown', () => {
+  it('contains ## Breaking Changes heading', () => {
+    const out = formatMarkdown(makeResult(), makeClassification());
+    expect(out).toContain('## Breaking Changes');
+  });
+
+  it('contains the breaking change location', () => {
+    const out = formatMarkdown(makeResult(), makeClassification());
+    expect(out).toContain('DELETE /pets/{petId}');
+  });
+
+  it('contains ## Warnings heading', () => {
+    const out = formatMarkdown(makeResult(), makeClassification());
+    expect(out).toContain('## Warnings');
+  });
+
+  it('returns no-changes message for empty diff', () => {
+    const emptyClassification: ClassificationResult = {
+      changes: [], breaking: [], warnings: [], info: [], hasBreaking: false,
+    };
+    const out = formatMarkdown({ ...makeResult(), isEmpty: true }, emptyClassification);
+    expect(out).toContain('No changes');
   });
 });
