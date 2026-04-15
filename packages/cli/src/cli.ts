@@ -5,6 +5,7 @@ import { registerBreakingCommand } from './commands/breaking.js';
 import { registerChangelogCommand } from './commands/changelog.js';
 import { registerValidateCommand } from './commands/validate.js';
 import { registerFlattenCommand } from './commands/flatten.js';
+import { registerInitCommand } from './commands/init.js';
 
 const program = new Command()
   .name('bsd')
@@ -28,6 +29,7 @@ registerBreakingCommand(program);
 registerChangelogCommand(program);
 registerValidateCommand(program);
 registerFlattenCommand(program);
+registerInitCommand(program);
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   process.stderr.write(`Fatal: ${err instanceof Error ? err.message : String(err)}\n`);
