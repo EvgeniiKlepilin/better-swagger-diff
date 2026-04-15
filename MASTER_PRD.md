@@ -322,10 +322,10 @@ As a developer, I want to run `bsd diff old.yaml new.yaml` and get a diff in my 
 As a team, I want a `.bsdrc` or `bsd.config.yaml` file to define org-wide settings so I don't repeat flags on every invocation.
 
 **Tasks:**
-- [ ] **2.2.1** Implement config file loading: look for `bsd.config.yaml` / `.bsdrc.yaml` / `.bsdrc.json` up the directory tree
-- [ ] **2.2.2** Config schema: spec version hints, ignored paths (glob), ignored rules (list), custom rules (file path), format defaults, auth headers for remote specs
-- [ ] **2.2.3** `bsd init` command to scaffold a config file interactively
-- [ ] **2.2.4** Config validation with clear error messages on malformed config
+- [x] **2.2.1** Implement config file loading: look for `bsd.config.yaml` / `.bsdrc.yaml` / `.bsdrc.json` up the directory tree
+- [x] **2.2.2** Config schema: spec version hints, ignored paths (glob), ignored rules (list), custom rules (file path), format defaults, auth headers for remote specs
+- [x] **2.2.3** `bsd init` command to scaffold a config file interactively
+- [x] **2.2.4** Config validation with clear error messages on malformed config
 
 ---
 
