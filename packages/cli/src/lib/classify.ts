@@ -134,7 +134,7 @@ function classifyParameterDiff(paramDiff: ParameterDiff, operationLoc: string, o
     });
     return;
   }
-  const becameRequired = paramDiff.before?.required === false && paramDiff.after?.required === true;
+  const becameRequired = paramDiff.before?.required !== true && paramDiff.after?.required === true;
   if (becameRequired) {
     out.push({
       severity: 'breaking',

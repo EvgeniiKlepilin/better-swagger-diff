@@ -146,4 +146,67 @@ describe('classifyDiff', () => {
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]?.severity).toBe('warning');
   });
+
+  it('flags newly deprecated operation as warning', () => {
+    const op: OperationDiff = {
+      path: '/pets',
+      method: 'get',
+      type: 'modified',
+      jsonPointer: '/paths/~1pets/get',
+      changes: [
+        {
+          type: 'modified',
+          path: '/paths/~1pets/get/deprecated',
+          before: false,
+          after: true,
+        },
+      ],
+      parameters: [],
+      responses: [],
+      extensions: [],
+    };
+    const pathDiff: PathDiff = {
+      path: '/pets',
+      type: 'modified',
+      jsonPointer: '/paths/~1pets',
+      pathParameters: [],
+      operations: [op],
+    };
+    const result = classifyDiff(makeEmptyResult({ paths: [pathDiff], isEmpty: false }));
+    expect(result.hasBreaking).toBe(false);
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]?.message).toBe('operation deprecated');
+  });
+
+  it('flags parameter that became required as breaking', () => {
+    const param: ParameterDiff = {
+      name: 'filter',
+      in: 'query',
+      type: 'modified',
+      jsonPointer: '/paths/~1pets/get/parameters/filter',
+      changes: [],
+      before: { name: 'filter', in: 'query', required: false, schema: { type: 'string' } },
+      after: { name: 'filter', in: 'query', required: true, schema: { type: 'string' } },
+    };
+    const op: OperationDiff = {
+      path: '/pets',
+      method: 'get',
+      type: 'modified',
+      jsonPointer: '/paths/~1pets/get',
+      changes: [],
+      parameters: [param],
+      responses: [],
+      extensions: [],
+    };
+    const pathDiff: PathDiff = {
+      path: '/pets',
+      type: 'modified',
+      jsonPointer: '/paths/~1pets',
+      pathParameters: [],
+      operations: [op],
+    };
+    const result = classifyDiff(makeEmptyResult({ paths: [pathDiff], isEmpty: false }));
+    expect(result.hasBreaking).toBe(true);
+    expect(result.breaking[0]?.message).toBe('parameter became required');
+  });
 });
