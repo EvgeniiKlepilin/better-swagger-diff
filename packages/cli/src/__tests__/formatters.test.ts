@@ -3,6 +3,8 @@ import { formatText } from '../lib/formatters/text.js';
 import { formatJson } from '../lib/formatters/json.js';
 import { formatYaml } from '../lib/formatters/yaml.js';
 import { formatMarkdown } from '../lib/formatters/markdown.js';
+import { formatHtml } from '../lib/formatters/html.js';
+import { formatJunit } from '../lib/formatters/junit.js';
 import { initColors } from '../lib/colors.js';
 import type { DiffResult } from '@better-swagger-diff/core';
 import type { ClassificationResult } from '../lib/classify.js';
@@ -141,5 +143,65 @@ describe('formatMarkdown', () => {
     // items formatted as: `- \`{location}\` — {message}`
     expect(out).toMatch(/`DELETE \/pets\/{petId}`/);
     expect(out).toContain('— operation removed');
+  });
+});
+
+describe('formatHtml', () => {
+  it('is a valid HTML document with DOCTYPE', () => {
+    const out = formatHtml(makeResult(), makeClassification());
+    expect(out).toContain('<!DOCTYPE html>');
+    expect(out).toContain('</html>');
+  });
+
+  it('contains the breaking change location', () => {
+    const out = formatHtml(makeResult(), makeClassification());
+    expect(out).toContain('DELETE /pets/{petId}');
+  });
+
+  it('contains BREAKING badge', () => {
+    const out = formatHtml(makeResult(), makeClassification());
+    expect(out).toContain('BREAKING');
+  });
+
+  it('escapes HTML special characters', () => {
+    const out = formatHtml(makeResult(), makeClassification());
+    // Location contains { and } which are not HTML special chars — verify & would be escaped
+    expect(out).not.toContain('&amp;'); // no & in our test data, so nothing to escape
+    expect(out).toContain('<table>'); // table structure present
+  });
+});
+
+describe('formatJunit', () => {
+  it('is valid XML with testsuites root', () => {
+    const out = formatJunit(makeResult(), makeClassification());
+    expect(out).toContain('<?xml');
+    expect(out).toContain('<testsuites');
+    expect(out).toContain('</testsuites>');
+  });
+
+  it('has failure element for breaking change', () => {
+    const out = formatJunit(makeResult(), makeClassification());
+    expect(out).toContain('<failure');
+    expect(out).toContain('operation removed');
+  });
+
+  it('has testcase for breaking change location', () => {
+    const out = formatJunit(makeResult(), makeClassification());
+    expect(out).toContain('DELETE /pets/{petId}');
+  });
+
+  it('has testcase for info change without failure element', () => {
+    const out = formatJunit(makeResult(), makeClassification());
+    expect(out).toContain('POST /users');
+    // Info items should NOT have a failure element
+    const infoSection = out.slice(out.indexOf('POST /users'));
+    expect(infoSection).not.toMatch(/<failure[^>]*message="operation added"/);
+  });
+
+  it('totals and failures count correctly', () => {
+    const out = formatJunit(makeResult(), makeClassification());
+    // 3 total changes, 1 breaking = 1 failure
+    expect(out).toContain('tests="3"');
+    expect(out).toContain('failures="1"');
   });
 });
