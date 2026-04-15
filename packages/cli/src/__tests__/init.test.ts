@@ -32,6 +32,11 @@ describe('generateConfigTemplate', () => {
     expect(t).toContain('# ignoredRules:');
   });
 
+  it('includes commented customRules example', () => {
+    const t = generateConfigTemplate({});
+    expect(t).toContain('# customRules:');
+  });
+
   it('includes commented auth example', () => {
     const t = generateConfigTemplate({});
     expect(t).toContain('# auth:');

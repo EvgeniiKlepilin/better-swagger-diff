@@ -5,13 +5,14 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { isValidFormat } from '../lib/formatters/index.js';
+import type { Format } from '../lib/formatters/index.js';
 
 /**
  * Generate the content of a starter `.bsdrc.yaml` config file.
  * Pure function — no I/O, easy to test.
  */
 export function generateConfigTemplate(options: {
-  format?: string;
+  format?: Format;
   noColor?: boolean;
 }): string {
   const format = options.format ?? 'text';
@@ -59,7 +60,7 @@ export function registerInitCommand(program: Command): void {
   program
     .command('init')
     .description('Scaffold a .bsdrc.yaml configuration file in the current directory')
-    .action(async (_opts: unknown, cmd: Command) => {
+    .action(async (_opts: Record<string, never>, cmd: Command) => {
       const globals = cmd.optsWithGlobals<{ quiet?: boolean }>();
       const configPath = join(process.cwd(), '.bsdrc.yaml');
 
@@ -76,7 +77,14 @@ export function registerInitCommand(program: Command): void {
           'Default output format? (text|json|yaml|markdown|html|junit) [text]: ',
         );
         const trimmed = rawFormat.trim();
-        const format = trimmed !== '' && isValidFormat(trimmed) ? trimmed : 'text';
+        let format: Format = 'text';
+        if (trimmed !== '') {
+          if (isValidFormat(trimmed)) {
+            format = trimmed;
+          } else {
+            process.stderr.write(`Unknown format "${trimmed}", falling back to "text".\n`);
+          }
+        }
 
         const rawNoColor = await rl.question('Disable colors by default? (y/N) [N]: ');
         const noColor = rawNoColor.trim().toLowerCase() === 'y';
