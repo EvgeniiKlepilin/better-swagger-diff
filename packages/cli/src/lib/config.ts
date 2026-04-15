@@ -123,9 +123,9 @@ export function validateConfig(raw: unknown, source = 'config'): BsdConfig {
   }
 
   if ('output' in obj) {
-    if (typeof obj['output'] !== 'string') {
+    if (typeof obj['output'] !== 'string' || obj['output'].trim() === '') {
       throw new Error(
-        `[${source}] "output" must be a string. Got: ${JSON.stringify(obj['output'])}`,
+        `[${source}] "output" must be a non-empty string. Got: ${JSON.stringify(obj['output'])}`,
       );
     }
     cfg.output = obj['output'];
@@ -179,9 +179,9 @@ export function validateConfig(raw: unknown, source = 'config'): BsdConfig {
   }
 
   if ('customRules' in obj) {
-    if (typeof obj['customRules'] !== 'string') {
+    if (typeof obj['customRules'] !== 'string' || obj['customRules'].trim() === '') {
       throw new Error(
-        `[${source}] "customRules" must be a string path. Got: ${JSON.stringify(obj['customRules'])}`,
+        `[${source}] "customRules" must be a non-empty string path. Got: ${JSON.stringify(obj['customRules'])}`,
       );
     }
     cfg.customRules = obj['customRules'];
@@ -243,6 +243,9 @@ export function resolveGlobalOptions(
   const noColor =
     rawGlobals.color === false ? true : (rawGlobals.noColor ?? config?.noColor ?? false);
 
+  // Invalid --format values silently fall back to config/default. Commander
+  // does not enumerate valid choices for --format, so this soft-fallback is
+  // intentional. A future story can add Commander's .choices() for hard rejection.
   const rawFormat = rawGlobals.format;
   const format: Format =
     rawFormat !== undefined && isValidFormat(rawFormat)

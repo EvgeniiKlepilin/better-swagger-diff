@@ -15,7 +15,7 @@ describe('findConfigFile', () => {
     const dir = mkdtempSync(join(tmpdir(), 'bsd-empty-'));
     try {
       const result = findConfigFile(dir);
-      expect(result === null || typeof result === 'string').toBe(true);
+      expect(result).toBeNull();
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -84,7 +84,7 @@ describe('loadConfig', () => {
     const dir = mkdtempSync(join(tmpdir(), 'bsd-noconfig-'));
     try {
       const result = loadConfig(dir);
-      expect(result === null || typeof result === 'object').toBe(true);
+      expect(result).toBeNull();
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -183,7 +183,11 @@ describe('validateConfig', () => {
   });
 
   it('throws when output is not string', () => {
-    expect(() => validateConfig({ output: 123 })).toThrow('"output" must be a string');
+    expect(() => validateConfig({ output: 123 })).toThrow('"output" must be a non-empty string');
+  });
+
+  it('throws when output is empty string', () => {
+    expect(() => validateConfig({ output: '' })).toThrow('"output" must be a non-empty string');
   });
 
   it('accepts ignoredPaths as string array', () => {
@@ -223,7 +227,11 @@ describe('validateConfig', () => {
   });
 
   it('throws when customRules is not string', () => {
-    expect(() => validateConfig({ customRules: {} })).toThrow('"customRules" must be a string');
+    expect(() => validateConfig({ customRules: {} })).toThrow('"customRules" must be a non-empty string');
+  });
+
+  it('throws when customRules is empty string', () => {
+    expect(() => validateConfig({ customRules: '' })).toThrow('"customRules" must be a non-empty string');
   });
 
   it('accepts auth as hostname → string map', () => {
