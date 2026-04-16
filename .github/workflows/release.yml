@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -129,22 +130,16 @@ jobs:
         run: pnpm build
 
       - name: Publish @better-swagger-diff/core
-        run: pnpm publish --no-git-checks --access public
+        run: npm publish --access public --provenance
         working-directory: packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @better-swagger-diff/cli
-        run: pnpm publish --no-git-checks --access public
+        run: npm publish --access public --provenance
         working-directory: packages/cli
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish better-swagger-diff (npm shim)
-        run: pnpm publish --no-git-checks --access public
+        run: npm publish --access public --provenance
         working-directory: packages/npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   update-manifests:
     name: Update Homebrew formula and Scoop manifest
