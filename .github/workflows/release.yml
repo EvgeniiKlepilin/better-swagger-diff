@@ -52,6 +52,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build packages (produces core/dist required by bun resolver)
+        run: pnpm build
+
       - name: Build binary (${{ matrix.target }})
         working-directory: packages/cli
         run: pnpm build:bin:${{ matrix.target }}
