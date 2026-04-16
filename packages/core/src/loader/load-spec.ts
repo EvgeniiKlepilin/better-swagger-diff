@@ -179,6 +179,9 @@ function isFilePath(source: string): boolean {
     source.startsWith('./') ||
     source.startsWith('../') ||
     // Windows absolute paths: C:\... or C:/...
-    /^[a-zA-Z]:[/\\]/.test(source)
+    /^[a-zA-Z]:[/\\]/.test(source) ||
+    // Bare relative paths without explicit ./ prefix (e.g. "packages/foo/bar.yaml").
+    // Excludes raw YAML/JSON content strings (which contain newlines or are pure JSON objects).
+    (!source.includes('\n') && (source.includes('/') || /\.(ya?ml|json)$/i.test(source)))
   );
 }
