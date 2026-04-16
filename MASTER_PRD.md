@@ -334,12 +334,12 @@ As a team, I want a `.bsdrc` or `bsd.config.yaml` file to define org-wide settin
 As a developer, I want to install `bsd` with a single command on macOS, Linux, and Windows without installing Node.js.
 
 **Tasks:**
-- [ ] **2.3.1** Build standalone binaries using Bun's `bun build --compile` for macOS arm64, macOS x64, Linux x64, Linux arm64, Windows x64
-- [ ] **2.3.2** Publish binaries as GitHub Release assets on every tag
-- [ ] **2.3.3** Write install script (`curl -fsSL https://bsd.sh | sh`) that detects platform and downloads the correct binary
-- [ ] **2.3.4** Publish npm package `better-swagger-diff` with the CLI as `bin` entry (Node.js fallback)
-- [ ] **2.3.5** Homebrew formula (`brew install better-swagger-diff`)
-- [ ] **2.3.6** Scoop manifest for Windows
+- [x] **2.3.1** Build standalone binaries using Bun's `bun build --compile` for macOS arm64, macOS x64, Linux x64, Linux arm64, Windows x64
+- [x] **2.3.2** Publish binaries as GitHub Release assets on every tag
+- [x] **2.3.3** Write install script (`curl -fsSL https://bsd.sh | sh`) that detects platform and downloads the correct binary
+- [x] **2.3.4** Publish npm package `better-swagger-diff` with the CLI as `bin` entry (Node.js fallback)
+- [x] **2.3.5** Homebrew formula (`brew install better-swagger-diff`)
+- [x] **2.3.6** Scoop manifest for Windows
 
 ---
 

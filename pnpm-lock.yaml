@@ -98,6 +98,12 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.17)
 
+  packages/npm:
+    dependencies:
+      '@better-swagger-diff/cli':
+        specifier: workspace:*
+        version: link:../cli
+
 packages:
 
   '@apidevtools/json-schema-ref-parser@11.7.2':

@@ -1,0 +1,26 @@
+{
+  "name": "better-swagger-diff",
+  "version": "0.1.0",
+  "description": "Compare Swagger/OpenAPI specs and detect breaking changes",
+  "keywords": ["swagger", "openapi", "diff", "breaking-changes", "api"],
+  "homepage": "https://github.com/better-swagger-diff/better-swagger-diff",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/better-swagger-diff/better-swagger-diff.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bsd": "./bin/bsd.js"
+  },
+  "files": ["bin"],
+  "scripts": {
+    "clean": "true"
+  },
+  "dependencies": {
+    "@better-swagger-diff/cli": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
