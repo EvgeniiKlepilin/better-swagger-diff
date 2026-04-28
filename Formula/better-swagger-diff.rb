@@ -6,7 +6,7 @@
 class BetterSwaggerDiff < Formula
   desc "Compare Swagger/OpenAPI specs and detect breaking changes"
   homepage "https://github.com/better-swagger-diff/better-swagger-diff"
-  version "0.1.0-test-6"
+  version "0.1.0-test-7"
   license "MIT"
 
   on_macos do
