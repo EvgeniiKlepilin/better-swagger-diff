@@ -1,13 +1,16 @@
 {
-  "version": "0.1.0",
   "description": "Compare Swagger/OpenAPI specs and detect breaking changes",
   "homepage": "https://github.com/better-swagger-diff/better-swagger-diff",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/better-swagger-diff/better-swagger-diff/releases/download/v0.1.0/bsd-windows-x64.exe",
-      "hash": "0000000000000000000000000000000000000000000000000000000000000000",
-      "bin": [["bsd-windows-x64.exe", "bsd"]]
+      "url": "https://github.com/better-swagger-diff/better-swagger-diff/releases/download/vundefined/bsd-windows-x64.exe",
+      "bin": [
+        [
+          "bsd-windows-x64.exe",
+          "bsd"
+        ]
+      ]
     }
   },
   "checkver": {
