@@ -118,10 +118,10 @@ jobs:
           for pkg in packages/core packages/cli packages/npm; do
             node -e "
               const fs = require('fs');
-              const p = JSON.parse(fs.readFileSync('$pkg/package.json', 'utf8'));
-              p.version = process.env.VERSION;
-              fs.writeFileSync('$pkg/package.json', JSON.stringify(p, null, 2) + '\n');
-            " VERSION="$VERSION"
+              const p = JSON.parse(fs.readFileSync('${pkg}/package.json', 'utf8'));
+              p.version = '${VERSION}';
+              fs.writeFileSync('${pkg}/package.json', JSON.stringify(p, null, 2) + '\n');
+            "
           done
         env:
           GITHUB_REF_NAME: ${{ github.ref_name }}
@@ -147,11 +147,12 @@ jobs:
     needs: release
 
     steps:
-      # RELEASE_TOKEN must be a PAT with `contents: write` on this repo.
-      # If the repo has branch protection requiring PR reviews, GITHUB_TOKEN
-      # cannot push directly to main — use a PAT stored as RELEASE_TOKEN instead.
+      # Checks out main (not the tag) so git is on a branch and can push back.
+      # RELEASE_TOKEN must be a PAT with `contents: write` if branch protection
+      # requires PR reviews; otherwise GITHUB_TOKEN is sufficient.
       - uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Download all binaries
